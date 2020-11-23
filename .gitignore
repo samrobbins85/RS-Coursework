@@ -130,3 +130,10 @@ dmypy.json
 
 # Stuff for me
 Dataset
+
+# LaTeX
+
+*.aux
+*.fls 
+*.fdb_latexmk
+*.synctex.gz
