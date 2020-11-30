@@ -1,7 +1,7 @@
 import json
 
-data = []
-for line in open("./Dataset/yelp_dataset/yelp_academic_dataset_business.json", "r"):
-    data.append(json.loads(line))
+with open("output.json") as infile:
+    data = json.load(infile)
+
 
 print(data[0])
