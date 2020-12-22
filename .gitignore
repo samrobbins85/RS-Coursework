@@ -137,3 +137,6 @@ Dataset
 *.fls 
 *.fdb_latexmk
 *.synctex.gz
+
+base data
+intermediate data
