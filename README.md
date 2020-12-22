@@ -14,3 +14,5 @@ Coursework from the Recommender Systems Module
 `covid_usable` is the covid dataset rewritten as a JSON list so it can be processed easier
 
 `output_covid` is the covid dataset filtered by the businesses, and with "TRUE" replaced with `true` for ease of use
+
+`output_date` is all reviews from `output_final` after 2015 (around 270k reviews)
