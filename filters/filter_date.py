@@ -5,11 +5,11 @@ from tqdm import tqdm
 
 output = []
 
-with open("output_final.json") as infile:
+with open("output_date.json") as infile:
     data = json.load(infile)
     for item in tqdm(data):
-        if int(item["date"][0:4]) > 2015:
+        if int(item["date"][0:4]) >= 2019:
             output.append(item)
 
-with open("output_date.json", "w") as outfile:
+with open("output_date_short.json", "w") as outfile:
     json.dump(output, outfile, indent=2)
