@@ -19,9 +19,7 @@ with open("output_date_short.json") as infile:
     merge = pd.merge(df, business_sort_occurrence, on="business_id")
     merge = pd.merge(merge, user_occurrence, on="user_id")
     merge = merge.sort_values(by=["counts"], ascending=False)
-    # print(merge)
-    # print(merge)
-    users = merge.nlargest(500, "user_counts").groupby("user_id").mean()
+    users = merge.nlargest(250, "user_counts").groupby("user_id").mean()
     # This will give a random sample of 10 of the 500 users who review italian restaurants most
     sample = users.sample(n=10).reset_index()
     mylist = sample["user_id"].tolist()
@@ -67,4 +65,12 @@ for count, business in enumerate(user_scores["business_id"]):
             cossim.append(1 - cosine(i12["stars_x"], i12["stars_y"]))
 
     business_sort_occurrence[business] = cossim
+
+# This will remove where all are NaN, because no comparison can be made
+for ind in business_sort_occurrence.index:
+    nan = (
+        math.isnan(business_sort_occurrence[i][ind]) for i in user_scores["business_id"]
+    )
+    if all(nan):
+        business_sort_occurrence.drop([ind])
 print(business_sort_occurrence)
