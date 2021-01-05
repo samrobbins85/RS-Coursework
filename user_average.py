@@ -72,5 +72,23 @@ for ind in business_sort_occurrence.index:
         math.isnan(business_sort_occurrence[i][ind]) for i in user_scores["business_id"]
     )
     if all(nan):
-        business_sort_occurrence.drop([ind])
+        print(ind)
+        business_sort_occurrence = business_sort_occurrence.drop([ind])
+scores = []
+for ind in business_sort_occurrence.index:
+    top = 0
+    bottom = 0
+    for i in user_scores.index:
+        if (
+            math.isnan(business_sort_occurrence[user_scores["business_id"][i]][ind])
+            == False
+        ):
+            bottom += business_sort_occurrence[user_scores["business_id"][i]][ind]
+            top += (
+                business_sort_occurrence[user_scores["business_id"][i]][ind]
+                * user_scores["stars"][i]
+            )
+    scores.append(top / bottom)
+business_sort_occurrence["scores"] = scores
+
 print(business_sort_occurrence)
