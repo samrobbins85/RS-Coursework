@@ -1,12 +1,7 @@
-from prompt_toolkit.shortcuts import radiolist_dialog
+import json
 
-mylist = ["one", "two", "three"]
-mylist = list(map(lambda x: (x, x), mylist))
-print(mylist)
-result = radiolist_dialog(
-    title="User selection",
-    text="Which user would you like to choose",
-    values=mylist,
-).run()
+with open("output_desc.json") as infile:
+    data = json.load(infile)
 
-# print(result)
+with open("output_desc_format.json", "w") as outfile:
+    json.dump(data, outfile, indent=2)
