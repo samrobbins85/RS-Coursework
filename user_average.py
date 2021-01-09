@@ -9,7 +9,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
 
 
-def content_based():
+def content_based(user_id):
     infile = open("output_desc.json", "r")
     data = json.load(infile)
     df = pd.DataFrame.from_dict(data)
@@ -18,16 +18,14 @@ def content_based():
     )
     tfidf_matrix = tf.fit_transform(df["text"])
     unsparse = pd.DataFrame.sparse.from_spmatrix(tfidf_matrix)
-    small = unsparse.iloc[
-        df.index[df["user_id"] == "BdRMVROS1MXOHxr-bdZv0g"].tolist(), :
-    ]
+    small = unsparse.iloc[df.index[df["user_id"] == user_id].tolist(), :]
     reduced_df = df[["business_id"]].reset_index()
     cosine_similarities = linear_kernel(tfidf_matrix, small)
     panda_cos = pd.DataFrame(cosine_similarities).reset_index()
     merge = (
         pd.merge(reduced_df, panda_cos, on="index")
         .drop(columns=["index"])
-        .drop(df.index[df["user_id"] == "BdRMVROS1MXOHxr-bdZv0g"].tolist())
+        .drop(df.index[df["user_id"] == user_id].tolist())
     )
     merge["mean"] = merge.mean(axis=1)
     merge = merge[["business_id", "mean"]].groupby("business_id").mean()
@@ -37,35 +35,43 @@ def content_based():
 def collaborative():
     with open("output_date_short.json") as infile:
         data = json.load(infile)
-        df = pd.DataFrame.from_dict(data)
-        df = df.drop(columns=["useful", "funny", "cool", "date"])
-        business_sort_occurrence = (
-            df.groupby(["business_id"]).size().reset_index(name="counts")
-        )
-        user_occurrence = df.groupby(["user_id"]).size().reset_index(name="user_counts")
-        business_sort_occurrence = business_sort_occurrence.nlargest(300, "counts")
-        business_sort_occurrence = pd.merge(
-            business_sort_occurrence, content_based(), on="business_id"
-        )
-        merge = pd.merge(df, business_sort_occurrence, on="business_id")
-        merge = pd.merge(merge, user_occurrence, on="user_id")
-        merge = merge.sort_values(by=["counts"], ascending=False)
-        users = merge.nlargest(100, "user_counts").groupby("user_id").mean()
-        sample = users.sample(n=10).reset_index()
-        mylist = sample["user_id"].tolist()
-        mylist = list(map(lambda x: (x, x), mylist))
-        chosen_user = radiolist_dialog(
-            title="User selection",
-            text="Which user would you like to choose",
-            values=mylist,
-        ).run()
-        user_scores = (
-            merge.loc[merge["user_id"] == chosen_user]
-            .groupby(["business_id"])
-            .mean()
-            .reset_index()
-            .drop(columns=["counts", "user_counts"])
-        )
+    df = pd.DataFrame.from_dict(data)
+    df = df.drop(columns=["useful", "funny", "cool", "date"])
+    business_sort_occurrence = (
+        df.groupby(["business_id"]).size().reset_index(name="counts")
+    )
+    user_occurrence = (
+        df.groupby(["user_id", "business_id"])
+        .mean()
+        .groupby(["user_id"])
+        .size()
+        .reset_index(name="user_counts")
+    )
+    business_sort_occurrence = business_sort_occurrence.nlargest(300, "counts")
+
+    merge = pd.merge(df, business_sort_occurrence, on="business_id")
+    merge = pd.merge(merge, user_occurrence, on="user_id")
+    merge = merge.sort_values(by=["counts"], ascending=False)
+    users = merge.groupby("user_id").mean()
+    users = users.nlargest(10, "user_counts")
+    sample = users.sample(n=10).reset_index()
+    mylist = sample["user_id"].tolist()
+    mylist = list(map(lambda x: (x, x), mylist))
+    chosen_user = radiolist_dialog(
+        title="User selection",
+        text="Which user would you like to choose",
+        values=mylist,
+    ).run()
+
+    merge = pd.merge(merge, content_based(chosen_user), on="business_id")
+
+    user_scores = (
+        merge.loc[merge["user_id"] == chosen_user]
+        .groupby(["business_id"])
+        .mean()
+        .reset_index()
+        .drop(columns=["counts", "user_counts"])
+    )
 
     avg_stars = (
         df.drop(columns=["review_id", "user_id"]).groupby(["business_id"]).mean()
@@ -146,6 +152,7 @@ def collaborative():
         adj_scores.append(business_sort_occurrence["stars"][ind] + (adj_top / bottom))
     business_sort_occurrence["weighted_average"] = scores
     business_sort_occurrence["adjusted_weighted_average"] = adj_scores
+    print(business_sort_occurrence)
     result = business_sort_occurrence[
         ["business_id", "weighted_average", "adjusted_weighted_average"]
     ]
@@ -158,12 +165,16 @@ infile = open("output_business_names.json")
 data = json.load(infile)
 business_names = pd.DataFrame.from_dict(data)
 collated = pd.merge(best, business_names, on="business_id")
-print(collated)
 covid_data = []
-for line in tqdm(open("yelp_academic_dataset_covid_features.json", "r")):
+for line in open("yelp_academic_dataset_covid_features.json", "r"):
     myline = json.loads(line)
     covid_data.append(myline)
 covid_df = pd.DataFrame.from_dict(covid_data).dropna(how="all")
 collated = pd.merge(collated, covid_df, on="business_id")
-
-print(collated)
+collated = collated[collated["Temporary Closed Until"] == "FALSE"]
+for index, row in collated.iterrows():
+    if row["Covid Banner"] != "FALSE":
+        banner = " - " + row["Covid Banner"]
+    else:
+        banner = ""
+    print(row["name"] + banner)

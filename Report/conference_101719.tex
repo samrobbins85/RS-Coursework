@@ -13,7 +13,7 @@
 
 \title{Recommender Systems}
 
-\author{\IEEEauthorblockN{Sam Robbins}
+\author{\IEEEauthorblockN{mbkb74}
     \IEEEauthorblockA{\textit{Department of Computer Science} \\
         \textit{Durham University}\\
         Durham, United Kingdom \\}
@@ -36,9 +36,13 @@
 
 \subsection{Domain of application}
 
+This application works on Italian restaurants.
+
 \subsection{Related work review}
 
 \subsection{Purpose/aim}
+
+The aim of this application is to recommend an Italian restaurant to the user.
 
 
 \section{Methods}
@@ -53,7 +57,13 @@ In order to make the data easier to process, along with increasing the accuracy 
 
 \subsection{Hybrid scheme}
 
+I have used a meta-level hybrid recommender system where one recommender (content-based filtering) is used to reduce the size of the model of restaurants. This allows for the second recommender (collaborative filtering) to operate on a limited subset of the most likely restaurants. This provides two benefits, one in improving the accuracy of the results by using a second recommender and in improving performance by supplying a short list to collaborative filtering.
+
 \subsection{Recommendation techniques/algorithms}
+
+There are two recommenders used here, content-based filtering and collaborative filtering. The content-based filtering works on the text of the reviews to find reviews that use similar words. An example of this is that if someone describes a restaurant as "cosy", then it will find other reviews that use the same word. Collaborative filtering looks at the restaurants the user has reviewed and finds people who have reviewed those restaurants in the same way and looks at their reviews of other restaurants to find the best restaurants.
+
+Furthermore the COVID-19 dataset is used to check the list of suggested restaurants and remove those that are closed as the user wouldn't be able to visit them.
 
 \subsection{Evaluation methods}
 
@@ -61,9 +71,25 @@ In order to make the data easier to process, along with increasing the accuracy 
 
 \subsection{Input interface}
 
+For the input for this application, the user can choose which user they are from a list of 10 randomly selected users from a list of users that have made lots of reviews. This is done so that the recommenders have more data to work with, providing more accurate results.
+
 \subsection{Recommendation algorithm}
 
+I find the count of the reviews for each business, and for each user I find how many reviews they have left. Then I only select the 300 most reviewed businesses, this allows for better predictions to be made. I then choose the 100 users who have left the most reviews and take a random sample of 10 to present to the user of the program. Likewise this allows for better predictions. Obviously in a real application you would choose your user from the whole set of users, but this provides more interesting data.
+
+This is where I use content based filtering. From \texttt{sklearn} I use the \texttt{TfidfVectorisor} to get the TF-IDF matrix, then use the \texttt{linear\_kernel} function between this matrix and the same matrix, but only including the user reviews. I then use these scores and choose the 300 best matches and merge this with the 300 most reviewed businesses previously found, to generate a smaller list where the restaurant is in both sets.
+
+For each users rating of a restaurant, I group repeated ratings of the same restaurant as the average, this allows for better representation as one person rating the same restaurant 5 stars lots of time shouldn't have more impact than once. I then generate the cosine similarity between all the restaurants as a matrix, using the ratings. For each restaurant the recommender wants to get a prediction for, the recommender loops over the cosine similarities generated for that item. This is to generate an adjusted weighted average, using the formula
+
+$$
+    AdjAvg=ItemAvg+\dfrac{\sum (cosSim \times (userScore-itemAvg))}{\sum cosSim}
+$$
+
+This concludes the collaborative filtering section. I then choose the 5 largest scores to present to the user, and remove any which are shown in the COVID dataset as not open.
+
 \subsection{Output interface}
+
+The output for this system is a list of 5 restaurants the user would most like, along with their COVID-19 notice so the user knows how to prepare.
 
 \section{Evaluation results}
 
