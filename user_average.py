@@ -9,7 +9,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
 
 
-def content_based(user_id):
+def content_based(user_id, toremove):
     infile = open("output_desc.json", "r")
     data = json.load(infile)
     df = pd.DataFrame.from_dict(data)
@@ -18,15 +18,16 @@ def content_based(user_id):
     )
     tfidf_matrix = tf.fit_transform(df["text"])
     unsparse = pd.DataFrame.sparse.from_spmatrix(tfidf_matrix)
-    small = unsparse.iloc[df.index[df["user_id"] == user_id].tolist(), :]
+    small = unsparse.iloc[
+        df[
+            (df["user_id"] == user_id) & (~df["business_id"].isin(toremove))
+        ].index.tolist(),
+        :,
+    ]
     reduced_df = df[["business_id"]].reset_index()
     cosine_similarities = linear_kernel(tfidf_matrix, small)
     panda_cos = pd.DataFrame(cosine_similarities).reset_index()
-    merge = (
-        pd.merge(reduced_df, panda_cos, on="index")
-        .drop(columns=["index"])
-        .drop(df.index[df["user_id"] == user_id].tolist())
-    )
+    merge = pd.merge(reduced_df, panda_cos, on="index").drop(columns=["index"])
     merge["mean"] = merge.mean(axis=1)
     merge = merge[["business_id", "mean"]].groupby("business_id").mean()
     return merge.nlargest(300, "mean")
@@ -63,7 +64,21 @@ def collaborative():
         values=mylist,
     ).run()
 
-    merge = pd.merge(merge, content_based(chosen_user), on="business_id")
+    toremove = (
+        merge.loc[merge["user_id"] == chosen_user]
+        .groupby(["business_id"])
+        .mean()
+        .reset_index()["business_id"]
+        .sample(frac=0.5)
+        .tolist()
+    )
+    print(toremove)
+    indexNames = merge[
+        (merge["user_id"] == chosen_user) & (merge["business_id"].isin(toremove))
+    ].index
+    merge.drop(indexNames, inplace=True)
+
+    merge = pd.merge(merge, content_based(chosen_user, toremove), on="business_id")
 
     user_scores = (
         merge.loc[merge["user_id"] == chosen_user]
@@ -152,29 +167,33 @@ def collaborative():
         adj_scores.append(business_sort_occurrence["stars"][ind] + (adj_top / bottom))
     business_sort_occurrence["weighted_average"] = scores
     business_sort_occurrence["adjusted_weighted_average"] = adj_scores
-    print(business_sort_occurrence)
+    # print(business_sort_occurrence)
     result = business_sort_occurrence[
         ["business_id", "weighted_average", "adjusted_weighted_average"]
     ]
-    return result
+    return (result, toremove)
 
 
-scores = collaborative()
-best = scores.nlargest(5, "adjusted_weighted_average")
+collab = collaborative()
+scores = collab[0]
+toremove = collab[1]
+print(scores)
+# covid_data = []
+# for line in open("yelp_academic_dataset_covid_features.json", "r"):
+#     myline = json.loads(line)
+#     covid_data.append(myline)
+# covid_df = pd.DataFrame.from_dict(covid_data).dropna(how="all")
+# scores = pd.merge(scores, covid_df, on="business_id")
+# collated = scores[scores["Temporary Closed Until"] == "FALSE"]
+best = scores.nlargest(20, "adjusted_weighted_average")
 infile = open("output_business_names.json")
 data = json.load(infile)
 business_names = pd.DataFrame.from_dict(data)
 collated = pd.merge(best, business_names, on="business_id")
-covid_data = []
-for line in open("yelp_academic_dataset_covid_features.json", "r"):
-    myline = json.loads(line)
-    covid_data.append(myline)
-covid_df = pd.DataFrame.from_dict(covid_data).dropna(how="all")
-collated = pd.merge(collated, covid_df, on="business_id")
-collated = collated[collated["Temporary Closed Until"] == "FALSE"]
 for index, row in collated.iterrows():
-    if row["Covid Banner"] != "FALSE":
-        banner = " - " + row["Covid Banner"]
-    else:
-        banner = ""
-    print(row["name"] + banner)
+    # if row["Covid Banner"] != "FALSE":
+    #     banner = " - " + row["Covid Banner"]
+    # else:
+    #     banner = ""]
+    if row["business_id"] in toremove:
+        print(row["business_id"])
