@@ -7,6 +7,7 @@
 \usepackage{graphicx}
 \usepackage{textcomp}
 \usepackage{xcolor}
+\usepackage{multirow}
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 \begin{document}
@@ -57,7 +58,7 @@ In order to make the data easier to process, along with increasing the accuracy 
 
 \subsection{Hybrid scheme}
 
-I have used a meta-level hybrid recommender system where one recommender (content-based filtering) is used to reduce the size of the model of restaurants. This allows for the second recommender (collaborative filtering) to operate on a limited subset of the most likely restaurants. This provides two benefits, one in improving the accuracy of the results by using a second recommender and in improving performance by supplying a short list to collaborative filtering.
+This uses a weighted hybrid scheme, with each recommender contributing half towards the final result. The scores for each are summed and halved to generate a final score for each restaurant.
 
 \subsection{Recommendation techniques/algorithms}
 
@@ -94,6 +95,73 @@ The output for this system is a list of 5 restaurants the user would most like, 
 \section{Evaluation results}
 
 \subsection{Comparison against baseline implementation}
+
+The hybrid implementation yields the following confusion matrix
+
+\begin{tabular}{l|l|c|c|}
+    \multicolumn{2}{c}{}&\multicolumn{2}{c}{Recommender}\\
+    \cline{3-4}
+    \multicolumn{2}{c|}{}&High&Low\\
+    \cline{2-4}
+    \multirow{2}{*}{User Rating}& High & 14& 19\\
+    \cline{2-4}
+    & Low & 5 & 7\\
+    \cline{2-4}
+
+\end{tabular}
+\\
+\\
+This gives the following statistics:
+\begin{itemize}
+    \item Precision 74\%
+    \item Recall 42 \%
+    \item Specificity 58\%
+\end{itemize}
+\vspace{2mm}
+Whereas the baseline implementation of just collaborative filtering gives the confusion matrix
+
+\begin{tabular}{l|l|c|c|}
+    \multicolumn{2}{c}{}&\multicolumn{2}{c}{Recommender}\\
+    \cline{3-4}
+    \multicolumn{2}{c|}{}&High&Low\\
+    \cline{2-4}
+    \multirow{2}{*}{User Rating}& High & 21 & 4\\
+    \cline{2-4}
+    & Low & 8 & 5\\
+    \cline{2-4}
+
+\end{tabular}
+\\
+\\
+Giving these statistics:
+\begin{itemize}
+    \item Precision 72 \%
+    \item Recall 84 \%
+    \item Specificity 38 \%
+\end{itemize}
+
+Finally the baseline implementation of content-based filtering gives the confusion matrix
+\begin{tabular}{l|l|c|c|}
+    \multicolumn{2}{c}{}&\multicolumn{2}{c}{Recommender}\\
+    \cline{3-4}
+    \multicolumn{2}{c|}{}&High&Low\\
+    \cline{2-4}
+    \multirow{2}{*}{User Rating}& High & 10 & 23\\
+    \cline{2-4}
+    & Low & 3 & 8\\
+    \cline{2-4}
+
+\end{tabular}
+\\
+\\
+Giving these statistics:
+\begin{itemize}
+    \item Precision 77 \%
+    \item Recall 30 \%
+    \item Specificity 72 \%
+\end{itemize}
+
+Collaborative filtering has poor specificity, not predicting negative values well, whereas content-based filtering has poor recall, not predicting positive values well. This is a good case for a hybrid recommender as my merging them it helps to smooth the incorrect results.
 
 \subsection{Comparison against hybrid recommenders in related studies}
 
