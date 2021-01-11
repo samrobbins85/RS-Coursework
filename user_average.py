@@ -149,6 +149,13 @@ toremove = (
     .sample(frac=0.5)
     .tolist()
 )
+eval_user_scores = (
+    merge.loc[merge["user_id"] == chosen_user]
+    .groupby(["business_id"])
+    .mean()
+    .reset_index()
+    .drop(columns=["counts", "user_counts"])
+)
 # From merge and df, remove the reviews talked about before
 indexNames = merge[
     (merge["user_id"] == chosen_user) & (merge["business_id"].isin(toremove))
@@ -181,9 +188,14 @@ scores = collaborative(business_sort_occurrence, user_scores, df)
 content = content_based(chosen_user, toremove)
 scores = pd.merge(scores, content, on="business_id", how="inner")
 scores["adjusted_weighted_average"] = (
-    scores["adjusted_weighted_average"] / scores["adjusted_weighted_average"].max()
+    scores["adjusted_weighted_average"] - scores["adjusted_weighted_average"].min()
+) / (
+    scores["adjusted_weighted_average"].max()
+    - scores["adjusted_weighted_average"].min()
 )
-scores["mean"] = scores["mean"] / scores["mean"].max()
+scores["mean"] = (scores["mean"] - scores["mean"].min()) / (
+    scores["mean"].max() - scores["mean"].min()
+)
 scores["merge"] = scores["mean"] + scores["adjusted_weighted_average"]
 # covid_data = []
 # for line in open("yelp_academic_dataset_covid_features.json", "r"):
@@ -207,3 +219,6 @@ for index, row in collated.iterrows():
     #     banner = ""]
     if row["business_id"] in toremove:
         print(row["business_id"])
+eval_user_scores = eval_user_scores[eval_user_scores["business_id"].isin(toremove)]
+evaluate = pd.merge(eval_user_scores, scores, on="business_id", how="inner")
+print(evaluate.sort_values(by=["merge"]))
