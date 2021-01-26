@@ -125,7 +125,7 @@ merge = pd.merge(merge, user_occurrence, on="user_id")
 # Get the average score each user leaves
 users = merge.groupby("user_id").mean()
 # Choose the n users that have reviewed the most restaurants
-users = users.nlargest(10, "user_counts")
+users = users.nlargest(100, "user_counts")
 # Sample n1 from that selection
 sample = users.sample(n=10).reset_index()
 # Turn this dataframe to a list to display to the user
@@ -137,32 +137,6 @@ chosen_user = radiolist_dialog(
     values=mylist,
 ).run()
 
-with open("output_date_short.json") as infile:
-    data = json.load(infile)
-df = pd.DataFrame.from_dict(data)
-df = df.drop(columns=["useful", "funny", "cool", "date"])
-# How many reviews a user has left
-user_occurrence = (
-    df.groupby(["user_id", "business_id"])
-    .mean()
-    .groupby(["user_id"])
-    .size()
-    .reset_index(name="user_counts")
-)
-# Users that just leave one review
-one_users = user_occurrence.loc[user_occurrence["user_counts"] == 1]
-# Remove from dataframe
-df = df[~df["user_id"].isin(one_users["user_id"].tolist())]
-# Group by the business, and get a count of how many reviews they have
-business_sort_occurrence = df.groupby(["business_id"]).size().reset_index(name="counts")
-# Add this counts column to merge
-merge = pd.merge(df, business_sort_occurrence, on="business_id")
-# Also get the user counts
-merge = pd.merge(merge, user_occurrence, on="user_id")
-# Get the average score each user leaves
-users = merge.groupby("user_id").mean()
-# Choose the n users that have reviewed the most restaurants
-users = users.nlargest(10, "user_counts")
 eval_user_scores = (
     merge.loc[merge["user_id"] == chosen_user]
     .groupby(["business_id"])
@@ -180,7 +154,7 @@ user_scores = (
 )
 # Average rating of each restaurant
 avg_stars = df.drop(columns=["review_id", "user_id"]).groupby(["business_id"]).mean()
-# Now make business sort occurence feature those stars
+# Now make business sort occurrence feature those stars
 business_sort_occurrence = business_sort_occurrence.drop(columns=["counts"])
 business_sort_occurrence = pd.merge(
     business_sort_occurrence,
