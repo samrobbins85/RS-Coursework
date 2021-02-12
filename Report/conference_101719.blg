@@ -14,45 +14,45 @@ Database file #1: report.bib
 Warning--empty booktitle in evaluation
 
 Done.
-You've used 1 entry,
+You've used 2 entries,
             4087 wiz_defined-function locations,
-            826 strings with 7470 characters,
-and the built_in function-call counts, 600 in all, are:
-= -- 27
-> -- 17
-< -- 0
-+ -- 8
-- -- 4
-* -- 42
-:= -- 99
-add.period$ -- 2
-call.type$ -- 1
-change.case$ -- 1
-chr.to.int$ -- 0
-cite$ -- 2
-duplicate$ -- 43
-empty$ -- 58
-format.name$ -- 5
-if$ -- 118
+            833 strings with 7666 characters,
+and the built_in function-call counts, 1310 in all, are:
+= -- 82
+> -- 30
+< -- 5
++ -- 14
+- -- 6
+* -- 74
+:= -- 205
+add.period$ -- 5
+call.type$ -- 2
+change.case$ -- 2
+chr.to.int$ -- 12
+cite$ -- 3
+duplicate$ -- 96
+empty$ -- 129
+format.name$ -- 8
+if$ -- 288
 int.to.chr$ -- 0
-int.to.str$ -- 1
-missing$ -- 10
-newline$ -- 26
-num.names$ -- 1
-pop$ -- 34
+int.to.str$ -- 2
+missing$ -- 19
+newline$ -- 29
+num.names$ -- 2
+pop$ -- 57
 preamble$ -- 1
 purify$ -- 0
 quote$ -- 2
-skip$ -- 36
+skip$ -- 91
 stack$ -- 0
-substring$ -- 1
-swap$ -- 22
-text.length$ -- 0
+substring$ -- 30
+swap$ -- 60
+text.length$ -- 1
 text.prefix$ -- 0
 top$ -- 5
-type$ -- 1
+type$ -- 2
 warning$ -- 1
-while$ -- 1
-width$ -- 2
-write$ -- 29
+while$ -- 6
+width$ -- 3
+write$ -- 38
 (There was 1 warning)

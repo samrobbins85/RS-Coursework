@@ -143,9 +143,9 @@ As part of the filtering of the data, I remove all users who have just reviewed 
 
 For the rating metric I used root mean square error, which gave the following results
 \begin{itemize}
-	\item Hybrid: 0.119
-	\item Collaborative: 0.128
-	\item Content-Based: 0.138
+	\item Hybrid: 0.345
+	\item Collaborative: 0.357
+	\item Content-Based: 0.371
 \end{itemize}
 
 This shows that by combining the results from collaborative and content-based filtering, I get a recommender that outperforms them both. Also all of these values are reasonably low, showing that the recommenders are all fairly good.
@@ -163,7 +163,7 @@ In \cite{evaluation}, they filter user profiles that have over 100 rated items, 
 
 \subsubsection{Rating}
 
-Unfortunately the source given for the previous two metrics didn't calculate a rating prediction
+Unfortunately the source given for the previous two metrics didn't calculate a rating prediction, however a different recommender for education calculated a root mean square error of 0.46, which is worse than the 0.345 best for my hybrid recommender \cite{dwivedi2017recommender}.
 
 \subsection{Ethical Issues}
 
