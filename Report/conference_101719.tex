@@ -25,13 +25,11 @@
 \maketitle
 
 \begin{abstract}
-    This document is a model and instructions for \LaTeX.
-    This and the IEEEtran.cls file define the components of your paper [title, text, heads, etc.]. *CRITICAL: Do Not Use Symbols, Special Characters, Footnotes,
-    or Math in Paper Title or Abstract.
+    This paper implements a hybrid recommender system on the Yelp dataset. It uses collaborative and content-based filtering with a weighted scheme.
 \end{abstract}
 
 \begin{IEEEkeywords}
-    component, formatting, style, styling, insert
+    Recommender systems, collaborative filtering, content filtering, hybrid filtering
 \end{IEEEkeywords}
 
 \section{Introduction}
@@ -42,6 +40,8 @@ This application works on Italian restaurants.
 
 \subsection{Related work review}
 
+There are a wide range of papers on recommender systems, in this paper I will be comparing my recommender system to one on a movie dataset \cite{evaluation} and one on big data in education \cite{dwivedi2017recommender} as the authors have applied a range of evaluation techniques that allows me to compare my produce recommender to theirs.
+
 \subsection{Purpose/aim}
 
 The aim of this application is to recommend an Italian restaurant to the user.
@@ -51,7 +51,7 @@ The aim of this application is to recommend an Italian restaurant to the user.
 
 \subsection{Data description}
 
-The data is from the Yelp dataset, this contains a list of the businesses on Yelp, detailing which categories they fall under. It also contains all the reviews, including a written review along with a range of scores. This also now contains a COVID-19 dataset, which lists the changes businesses are making due to COVID-19. There are around 8 million reviews in the review dataset.
+The data is from the Yelp dataset \cite{b1}, this contains a list of the businesses on Yelp, detailing which categories they fall under. It also contains all the reviews, including a written review along with a range of scores. This also now contains a COVID-19 dataset, which lists the changes businesses are making due to COVID-19. There are around 8 million reviews in the review dataset.
 
 \subsection{Data preparation and feature selection}
 
@@ -94,7 +94,7 @@ This concludes the collaborative filtering section. I then choose the 5 largest 
 
 \subsection{Output interface}
 
-The output for this system is a list of 5 restaurants the user would most like, along with their COVID-19 notice so the user knows how to prepare.
+The output for this system is a list of 5 restaurants the user would most like, along with their COVID-19 notice so the user knows how to prepare. This also displays a percentage to the user which is the weighted average calculated by the hybrid recommender to be more transparent about why they are being recommended and so that they can better compare the restaurants.
 
 \section{Evaluation results}
 
@@ -179,11 +179,7 @@ This has the potential to influence people's behaviour by encouraging them to go
 
 \section{Conclusion}
 
-\subsection{Limitations}
-
 This recommender is limited by the data provided to it. People don't leave lots of reviews, and so this limits the capabilities of both recommenders in their functionality. Also, I want this to run in a reasonable amount of time, so the set of reviews has been filtered down to a small timescale and category, it is likely that the predictions would be better if they had more data.
-
-\subsection{Further developments}
 
 
 \bibliographystyle{IEEEtran}
