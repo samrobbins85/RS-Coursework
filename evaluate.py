@@ -8,6 +8,7 @@ from prompt_toolkit.shortcuts import radiolist_dialog
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
 from sklearn.metrics import confusion_matrix
+from sklearn.metrics import mean_squared_error
 
 
 def content_based(user_id, toremove):
@@ -144,6 +145,7 @@ sum_tn = 0
 sum_fp = 0
 sum_fn = 0
 sum_tp = 0
+sum_rmse=0
 for chosen_user in tqdm(mylist):
     with open("output_date_short.json") as infile:
         data = json.load(infile)
@@ -233,7 +235,7 @@ for chosen_user in tqdm(mylist):
     scores["mean"] = (scores["mean"] - scores["mean"].min()) / (
         scores["mean"].max() - scores["mean"].min()
     )
-    scores["merge"] = scores["mean"] + scores["adjusted_weighted_average"]
+    scores["merge"] = (scores["mean"] + scores["adjusted_weighted_average"])/2
     # scores.loc[scores["stars"] > 3, "stars"] = 1
     # scores.loc[scores["stars"] <= 3, "stars"] = 0
     # covid_data = []
@@ -259,33 +261,40 @@ for chosen_user in tqdm(mylist):
     #         print(row["business_id"])
     eval_user_scores = eval_user_scores[eval_user_scores["business_id"].isin(toremove)]
     evaluate = pd.merge(eval_user_scores, scores, on="business_id", how="inner")
+    evaluate["stars"]=evaluate["stars"]/5
     print(evaluate)
-    evaluate.loc[evaluate["stars"] <= 3, "stars"] = 0
-    evaluate.loc[evaluate["stars"] > 3, "stars"] = 1
-    evaluate.loc[evaluate["merge"] <= 1, "merge"] = 0
-    evaluate.loc[evaluate["merge"] > 1, "merge"] = 1
-    evaluate.loc[
-        evaluate["mean"] <= 0.5, "mean"
-    ] = 0
-    evaluate.loc[
-        evaluate["mean"] > 0.5, "mean"
-    ] = 1
-    confuse = confusion_matrix(
-        evaluate["stars"].tolist(), evaluate["mean"].tolist()
-    ).ravel()
-    if len(confuse) == 4:
-        tn, fp, fn, tp = confuse
-        sum_tn += tn
-        sum_fp += fp
-        sum_fn += fn
-        sum_tp += tp
-    print("Round")
-    print(sum_tn)
-    print(sum_fp)
-    print(sum_fn)
-    print(sum_tp)
+    rmse = mean_squared_error(evaluate["stars"].tolist(), evaluate["mean"].tolist())
+    print(rmse)
+    sum_rmse+=rmse
+    # evaluate.loc[evaluate["stars"] <= 3, "stars"] = 0
+    # evaluate.loc[evaluate["stars"] > 3, "stars"] = 1
+    # evaluate.loc[evaluate["merge"] <= 1, "merge"] = 0
+    # evaluate.loc[evaluate["merge"] > 1, "merge"] = 1
+    # evaluate.loc[
+    #     evaluate["mean"] <= 0.5, "mean"
+    # ] = 0
+    # evaluate.loc[
+    #     evaluate["mean"] > 0.5, "mean"
+    # ] = 1
+    # confuse = confusion_matrix(
+    #     evaluate["stars"].tolist(), evaluate["mean"].tolist()
+    # ).ravel()
+    # if len(confuse) == 4:
+    #     tn, fp, fn, tp = confuse
+    #     sum_tn += tn
+    #     sum_fp += fp
+    #     sum_fn += fn
+    #     sum_tp += tp
+    # print("Round")
+    # print(sum_tn)
+    # print(sum_fp)
+    # print(sum_fn)
+    # print(sum_tp)
 
-print(sum_tn)
-print(sum_fp)
-print(sum_fn)
-print(sum_tp)
+print("Result")
+print(sum_rmse/10)
+
+# print(sum_tn)
+# print(sum_fp)
+# print(sum_fn)
+# print(sum_tp)

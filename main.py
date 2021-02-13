@@ -11,7 +11,7 @@ from sklearn.metrics import confusion_matrix
 
 
 def content_based(user_id):
-    infile = open("output_desc.json", "r")
+    infile = open("output_desc2.json", "r")
     data = json.load(infile)
     data = pd.DataFrame.from_dict(data)
     tf = TfidfVectorizer(
@@ -100,10 +100,9 @@ def collaborative(business_sort_occurrence, user_scores, df):
     return result
 
 
-with open("output_date_short.json") as infile:
+with open("output_desc2.json") as infile:
     data = json.load(infile)
 df = pd.DataFrame.from_dict(data)
-df = df.drop(columns=["useful", "funny", "cool", "date"])
 # How many reviews a user has left
 user_occurrence = (
     df.groupby(["user_id", "business_id"])
@@ -116,6 +115,7 @@ user_occurrence = (
 one_users = user_occurrence.loc[user_occurrence["user_counts"] == 1]
 # Remove from dataframe
 df = df[~df["user_id"].isin(one_users["user_id"].tolist())]
+
 # Group by the business, and get a count of how many reviews they have
 business_sort_occurrence = df.groupby(["business_id"]).size().reset_index(name="counts")
 # Add this counts column to merge
