@@ -144,3 +144,6 @@ intermediate data
 .vscode
 
 yelp_academic*
+
+*.zip
+Submission/*

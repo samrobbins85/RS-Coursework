@@ -11,7 +11,7 @@ from sklearn.metrics import confusion_matrix
 
 
 def content_based(user_id):
-    infile = open("output_desc2.json", "r")
+    infile = open("main_data.json", "r")
     data = json.load(infile)
     data = pd.DataFrame.from_dict(data)
     tf = TfidfVectorizer(
@@ -100,7 +100,7 @@ def collaborative(business_sort_occurrence, user_scores, df):
     return result
 
 
-with open("output_desc2.json") as infile:
+with open("main_data.json") as infile:
     data = json.load(infile)
 df = pd.DataFrame.from_dict(data)
 # How many reviews a user has left
@@ -179,14 +179,14 @@ scores["mean"] = (scores["mean"] - scores["mean"].min()) / (
 )
 scores["merge"] = scores["mean"] + scores["adjusted_weighted_average"]
 covid_data = []
-for line in open("yelp_academic_dataset_covid_features.json", "r"):
+for line in open("covid.json", "r"):
     myline = json.loads(line)
     covid_data.append(myline)
 covid_df = pd.DataFrame.from_dict(covid_data).dropna(how="all")
 scores = pd.merge(scores, covid_df, on="business_id")
 collated = scores[scores["Temporary Closed Until"] == "FALSE"]
 best = collated.nlargest(5, "merge")
-infile = open("output_business_names.json")
+infile = open("business_names.json")
 data = json.load(infile)
 business_names = pd.DataFrame.from_dict(data)
 collated = pd.merge(best, business_names, on="business_id")
